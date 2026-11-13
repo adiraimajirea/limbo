@@ -7,18 +7,27 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
+      # JDK 17 only for the Android SDK manager (cmdline-tools 16 requires it)
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - name: Install SDK packages
+        run: sdkmanager "platforms;android-29" "build-tools;29.0.3"
+
+      # Switch to JDK 11 for the build itself (Gradle 7.0.2 + AGP 4.1.1)
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 11
-      - uses: android-actions/setup-android@v3
-      - name: Install SDK packages
-        run: sdkmanager "platforms;android-29" "build-tools;29.0.3"
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 7.0.2
       - name: Build debug APK
         run: gradle :limbo-android-x86:assembleDebug --no-daemon
+
       - uses: actions/upload-artifact@v4
         with:
           name: limbo-shared-folder-apk

@@ -31,8 +31,11 @@ jobs:
       - name: Build debug APK
         run: gradle :limbo-android-x86:assembleDebug --no-daemon
 
-      - name: Check native libs are in the APK
-        run: unzip -l limbo-android-x86/build/outputs/apk/debug/*.apk | grep -c "libcompat-limbo.so"
+      - name: Check native libs and BIOS are in the APK
+        run: |
+          APK=$(ls limbo-android-x86/build/outputs/apk/debug/*.apk)
+          unzip -l "$APK" | grep -c "libcompat-limbo.so"
+          unzip -l "$APK" | grep -c "assets/roms/bios-256k.bin"
 
       - uses: actions/upload-artifact@v4
         with:

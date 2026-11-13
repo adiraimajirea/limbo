@@ -8,6 +8,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The repo's .gitignore excludes jniLibs/, so fetch the native libs during the build
+      - name: Fetch native libs
+        run: sh ./fetch-native-libs.sh
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -26,6 +30,9 @@ jobs:
 
       - name: Build debug APK
         run: gradle :limbo-android-x86:assembleDebug --no-daemon
+
+      - name: Check native libs are in the APK
+        run: unzip -l limbo-android-x86/build/outputs/apk/debug/*.apk | grep -c "libcompat-limbo.so"
 
       - uses: actions/upload-artifact@v4
         with:

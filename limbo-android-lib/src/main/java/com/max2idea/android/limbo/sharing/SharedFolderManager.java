@@ -64,7 +64,7 @@ public class SharedFolderManager {
                             Log.i(TAG, "guest request: " + line);
                             if (!guestConnected) {
                                 guestConnected = true;
-                                ToastUtils.toastShort(appContext, appContext.getString(R.string.sharedFolderGuestConnected));
+                                ToastUtils.toastShort(appContext, "Guest connected to the shared folder");
                             }
                         }
                     });

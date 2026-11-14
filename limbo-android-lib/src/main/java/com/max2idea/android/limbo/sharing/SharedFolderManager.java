@@ -18,6 +18,8 @@ import java.io.File;
 public class SharedFolderManager {
     private static final String TAG = "SharedFolderManager";
     private static WebDavServer server;
+    private static volatile boolean guestConnected;
+    private static Context appContext;
 
     /**
      * Starts the server if the machine has a shared folder and uses the user network.
@@ -25,14 +27,19 @@ public class SharedFolderManager {
      */
     public static synchronized void start(Context context, Machine machine) {
         stop();
+        guestConnected = false;
+        appContext = context.getApplicationContext();
         try {
             if (!Config.enableSharedFolder || machine == null
                     || !LimboSettingsManager.getEnableSharedFolderServer(context))
                 return;
             String path = machine.getSharedFolderPath();
-            if (path == null || path.trim().length() == 0 || path.equals("None"))
+            if (path == null || path.trim().length() == 0 || path.equals("None")) {
+                Log.i(TAG, "No shared folder set for this machine, server not started");
                 return;
+            }
 
+            Log.i(TAG, "Shared folder: " + path + ", network: " + machine.getNetwork());
             if (!"User".equals(machine.getNetwork())) {
                 ToastUtils.toastLong(context, context.getString(R.string.sharedFolderNeedsUserNetwork));
                 return;
@@ -50,6 +57,15 @@ public class SharedFolderManager {
                         @Override
                         public void log(String message, Throwable error) {
                             Log.w(TAG, message, error);
+                        }
+
+                        @Override
+                        public void request(String line) {
+                            Log.i(TAG, "guest request: " + line);
+                            if (!guestConnected) {
+                                guestConnected = true;
+                                ToastUtils.toastShort(appContext, appContext.getString(R.string.sharedFolderGuestConnected));
+                            }
                         }
                     });
             server.start();

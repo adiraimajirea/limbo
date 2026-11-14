@@ -45,6 +45,9 @@ public class WebDavServer {
 
     public interface Logger {
         void log(String message, Throwable error);
+
+        /** Called after every handled request, e.g. "GET /a.txt -> 200". */
+        void request(String line);
     }
 
     private static final int BUFFER_SIZE = 64 * 1024;
@@ -181,6 +184,8 @@ public class WebDavServer {
                         res.sendError(500, "Internal Server Error");
                     }
                 }
+                if (logger != null)
+                    logger.request(req.method + " " + req.rawPath + " -> " + res.status);
                 keepAlive = res.keepAlive && !req.closeAfter;
                 // drain what the handler did not consume so the next request parses properly
                 if (keepAlive && !req.bodyConsumed) {

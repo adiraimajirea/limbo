@@ -142,6 +142,12 @@ public class Dispatcher implements ViewListener {
             case REMOVABLE_DRIVE:
                 setDrive(value);
                 break;
+            case SHARED_FOLDER:
+                // upstream never handled this, so the selected shared folder was not stored
+                String sharedFolder = convertString(property, value);
+                setDriveValue(MachineProperty.SHARED_FOLDER,
+                "None".equals(sharedFolder) ? null : sharedFolder);
+                break;
             case MEDIA_INTERFACE:
                 setDriveMediaInterface(value);
             case SOUNDCARD:
